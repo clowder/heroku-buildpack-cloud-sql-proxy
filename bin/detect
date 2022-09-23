@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Cloud SQL Auth proxy"
+exit 0

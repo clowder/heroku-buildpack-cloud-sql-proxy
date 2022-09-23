@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BUILD_DIR=$1
+BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
+VERSION=$(cat ./bin/version)
+
+echo "-----> Downloading Cloud SQL Auth proxy $VERSION..."
+
+curl -s -L --retry 3 -o "cloud_sql_proxy" "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/$VERSION/cloud-sql-proxy.linux.amd64"
+
+mkdir -p "$BUILD_DIR"/.gcloud/{bin,var/log}
+
+chmod +x "cloud_sql_proxy"
+mv "cloud_sql_proxy" "$BUILD_DIR/.gcloud/bin"
+
+mkdir -p "$BUILD_DIR/.profile.d/"
+cp "$BP_DIR"/profile/* "$BUILD_DIR/.profile.d/"
