@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# Adapted from from https://github.com/heroku/heroku-buildpack-nginx
+
+set -euo pipefail
+
+PSMGR="/tmp/cloud-sql-proxy-buildpack-wait"
+rm -f $PSMGR
+mkfifo $PSMGR
+
+(
+  echo 'buildpack=cloud-sql-proxy at=cloud-sql-proxy-boot'
+  cloud_sql_proxy --health-check --unix-socket "/tmp" --max-sigterm-delay "10s" "$GCLOUD_SQL_INSTANCE"
+  echo 'cloud-sql-proxy' > $PSMGR
+) &
+
+while ! curl -sf http://localhost:9090/startup > /dev/null; do
+  echo 'buildpack=cloud-sql-proxy at=cloud-sql-proxy-starting'
+  sleep 1
+done
+echo 'buildpack=cloud-sql-proxy at=cloud-sql-proxy-ready'
+
+(
+  COMMAND=$*
+  echo "buildpack=cloud-sql-proxy at=start-app cmd=\"$COMMAND\""
+  $COMMAND
+  echo 'app' > $PSMGR
+) &
+
+read -r EXIT_PROCESS < $PSMGR
+echo "buildpack=nginx at=exit process=$EXIT_PROCESS"
+
+# https://stackoverflow.com/a/5586663/1166861
+trap 'kill $(jobs -pr) && wait' EXIT
+
+exit 1

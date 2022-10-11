@@ -14,5 +14,7 @@ mkdir -p "$BUILD_DIR"/.gcloud/{bin,var/log}
 chmod +x "cloud_sql_proxy"
 mv "cloud_sql_proxy" "$BUILD_DIR/.gcloud/bin"
 
+cp "$BP_DIR"/bin/start-cloud-sql-proxy "$BUILD_DIR/.gcloud/bin"
+
 mkdir -p "$BUILD_DIR/.profile.d/"
 cp "$BP_DIR"/profile/* "$BUILD_DIR/.profile.d/"
