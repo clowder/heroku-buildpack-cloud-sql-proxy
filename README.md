@@ -19,5 +19,9 @@ permissions][1] created.
     ```shell
     heroku config:set GCLOUD_SQL_INSTANCE=<INSTANCE_CONNECTION_NAME>
     ```
+4. Update your `Procfile` to launch you're web process via the wrapper script.
+    ```shell
+    web: start-cloud-sql-proxy bin/rails server -p ${PORT:-5000} -e $RAILS_ENV
+    ```
 
 [1]: https://github.com/GoogleCloudPlatform/cloud-sql-proxy#credentials
